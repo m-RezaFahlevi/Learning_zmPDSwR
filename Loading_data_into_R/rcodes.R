@@ -5,6 +5,36 @@ View(uciCar)
 class(uciCar)
 summary(uciCar)
 
+#Read data files in .xlsx extension
+library(gdata)
+bookings <- read.xls('Workbook1.xlsx', sheet = 1, pattern = 'date', stringsAsFactors = FALSE, as.is = TRUE)
+print(bookings)
+prices <- read.xls('Workbook1.xlsx', sheet = 2, pattern = 'date', stringsAsFactors = FALSE, as.is = TRUE)
+print(prices)
+class(bookings)
+View(bookings)
+View(prices)
+summary(bookings)
+summary(prices)
+
+#Using melt to restructured data
+library(reshape2)
+bthin <- melt(bookings, id.vars = c('date'), variable.name = 'daysBefore', value.name = 'bookings')
+pthin <- melt(prices, id.vars = c('date'), variable.name = 'daysBefore', value.name = 'prices')
+daysCodes <- c('day.of.stay', 'X1.before', 'X2.before', 'X3.before')
+bthin$nDaysBefore <- match(bthin$daysBefore, daysCodes)-1
+pthin$nDaysBefore <- match(pthin$daysBefore, daysCodes)-1
+pthin$prices <- as.numeric(gsub('\\$', '',pthin$prices))
+print(head(pthin))
+print(head(bthin))
+
+#Lining up for the data for analysis
+library(sqldf)
+sqlBookingThin <- sqldf('select * from bthin')
+sqlPriceThin <- sqldf('SELECT * FROM pthin')
+print(sqlBookingThin)
+print(sqlPriceThin)
+
 #Using R on less-structure data
 d <- read.table('https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/german/german.data', sep = ' ', header = FALSE, stringsAsFactors = FALSE)
 View(d)
